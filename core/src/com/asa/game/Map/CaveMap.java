@@ -7,22 +7,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Map {
+public class CaveMap {
     final int size;
     final int tileSize;
 
-    private boolean[][] map; //true = wall
+    private boolean[][] walls; //true = wall
     private Random rand;
 
-    public Map(int size, int tileSize) {
+    public CaveMap(int size, int tileSize) {
         this.size = size;
         this.tileSize = tileSize;
 
-        map = new boolean[size][size];
+        walls = new boolean[size][size];
         rand = new Random();
 
         addRandomWalls(size/2, 1, size/2);
         clearCenter();
+    }
+
+    public boolean[][] getWalls() {
+        return walls;
     }
 
     public Vector2 getCenter() {
@@ -42,14 +46,14 @@ public class Map {
         if(!isInBounds(tile))
             return false;
 
-        return map[tile.x][tile.y];
+        return walls[tile.y][tile.x];
     }
 
     public boolean isWall(int x, int y) {
         if(!isInBounds(x, y))
             return false;
 
-        return map[x][y];
+        return walls[y][x];
     }
 
     public GridPoint2 getTile(Vector2 pos) {
@@ -118,7 +122,7 @@ public class Map {
         if(!isInBounds(tile))
             return false;
 
-        map[tile.x][tile.y] = wall;
+        walls[tile.y][tile.x] = wall;
         return true;
     }
 
@@ -126,7 +130,7 @@ public class Map {
         if(!isInBounds(x, y))
             return false;
 
-        map[x][y] = wall;
+        walls[y][x] = wall;
         return true;
     }
 

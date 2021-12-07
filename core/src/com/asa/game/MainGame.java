@@ -1,6 +1,6 @@
 package com.asa.game;
 
-import com.asa.game.Map.Map;
+import com.asa.game.Map.CaveMap;
 import com.asa.game.Map.MapRenderer;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -8,17 +8,13 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Polygon;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
-
-import java.awt.*;
 
 public class MainGame extends ApplicationAdapter {
 	ShapeRenderer shapeRenderer;
 	ShapeRenderer lineRenderer;
 
-	Map map;
+	CaveMap caveMap;
 	MapRenderer mapRenderer;
 	Wizard wizard;
 
@@ -32,9 +28,9 @@ public class MainGame extends ApplicationAdapter {
 		shapeRenderer = new ShapeRenderer();
 		lineRenderer = new ShapeRenderer();
 
-		map = new Map(32, 16);
-		mapRenderer = new MapRenderer(map, shapeRenderer, lineRenderer);
-		wizard = new Wizard(map.getCenter());
+		caveMap = new CaveMap(32, 16);
+		mapRenderer = new MapRenderer(caveMap, shapeRenderer, lineRenderer);
+		wizard = new Wizard(caveMap.getCenter());
 
 		//for later - use one big floor texture to draw only the visible polygon
 		polySpriteBatch = new PolygonSpriteBatch();
@@ -44,6 +40,7 @@ public class MainGame extends ApplicationAdapter {
 	@Override
 	public void render () {
 		ScreenUtils.clear(0.15f, 0.2f, 0.59f, 1);
+		Gdx.graphics.setTitle("" + Gdx.graphics.getFramesPerSecond());
 
 		mapRenderer.calcRaysAndVisibleTiles(3000, wizard.getPosition());
 
@@ -54,11 +51,11 @@ public class MainGame extends ApplicationAdapter {
 
 		lineRenderer.begin(ShapeRenderer.ShapeType.Line);
 		//mapRenderer.drawGrid();
-		//mapRenderer.drawRays();
+		mapRenderer.drawRays();
 		lineRenderer.end();
 
 		//for later - use one big floor texture to draw only the visible polygon
-		drawFloor();
+		//drawFloor();
 
 		handleInput();
 	}
