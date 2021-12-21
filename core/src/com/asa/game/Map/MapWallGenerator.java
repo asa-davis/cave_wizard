@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class MapWallGenerator {
 
@@ -22,16 +21,10 @@ public class MapWallGenerator {
     }
 
     private static class MapCell {
-        // all arrays are indexed N,S,E,W
-        private boolean[] hasNeighbor;
-        private Line[] edges;
-
-        // since we scan from bottom left, these have already been processed
-        private MapCell southernNeighbor;
-        private MapCell westernNeighbor;
+        // indexed N,S,E,W
+        private final Line[] edges;
 
         public MapCell() {
-            hasNeighbor = new boolean[4];
             edges = new Line[4];
         }
 
@@ -44,24 +37,12 @@ public class MapWallGenerator {
             return -1; // what's an exception??
         }
 
-        public void setHasNeighbor(Direction dir) {
-            hasNeighbor[getIndexFromDir(dir)] = true;
-        }
-
         public void setEdge(Direction dir, Line edge) {
             edges[getIndexFromDir(dir)] = edge;
         }
 
         public Line getEdge(Direction dir) {
             return edges[getIndexFromDir(dir)];
-        }
-
-        public MapCell getSouthernNeighbor() {
-            return southernNeighbor;
-        }
-
-        public MapCell getWesternNeighbor() {
-            return westernNeighbor;
         }
     }
 
@@ -101,8 +82,8 @@ public class MapWallGenerator {
             }
         };
 
-        private int xMod;
-        private int yMod;
+        private final int xMod;
+        private final int yMod;
 
         Direction(int xMod, int yMod ) {
             this.xMod = xMod;
@@ -160,35 +141,5 @@ public class MapWallGenerator {
         System.out.println(lines.size() + " wall lines generated");
 
         return lines;
-    }
-
-
-
-
-    //brute force, deprecated.
-    //performance difference???
-    public static List<Line> getWallLinesBruteForce(CaveMap map) {
-        List<Line> lines = new ArrayList<>();
-
-        for(int y = 0; y < map.getSize(); y++) {
-            for(int x = 0; x < map.getSize(); x++) {
-                if(map.isWall(x, y))
-                    lines.addAll(getTileLines(new GridPoint2(x, y), map));
-            }
-        }
-
-        return lines;
-    }
-
-    private static List<Line> getTileLines(GridPoint2 tile, CaveMap map) {
-        List<Line> lines = new ArrayList<>();
-        lines.add(new Line(map.getPosBotL(tile), map.getPosBotR(tile)));
-        lines.add(new Line(map.getPosBotR(tile), map.getPosTopR(tile)));
-        lines.add(new Line(map.getPosTopR(tile), map.getPosTopL(tile)));
-        lines.add(new Line(map.getPosTopL(tile), map.getPosBotL(tile)));
-        return lines;
-    }
-
-    public static void main(String[] args) {
     }
 }
