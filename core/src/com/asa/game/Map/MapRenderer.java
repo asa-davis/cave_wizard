@@ -91,18 +91,18 @@ public class MapRenderer {
 
         if(dir.x < 0) {
             step.x = -1;
-            rayLength1D.x = ((start.x - caveMap.getPos(currTile).x) / caveMap.tileSize) * rayUnitStepSize.x;
+            rayLength1D.x = ((start.x - caveMap.getPosBotL(currTile).x) / caveMap.tileSize) * rayUnitStepSize.x;
         } else {
             step.x = 1;
-            rayLength1D.x = ((caveMap.getPos(currTile).x + caveMap.tileSize - start.x) / caveMap.tileSize) * rayUnitStepSize.x;
+            rayLength1D.x = ((caveMap.getPosBotL(currTile).x + caveMap.tileSize - start.x) / caveMap.tileSize) * rayUnitStepSize.x;
         }
 
         if(dir.y < 0) {
             step.y = -1;
-            rayLength1D.y = ((start.y - caveMap.getPos(currTile).y) / caveMap.tileSize) * rayUnitStepSize.y;
+            rayLength1D.y = ((start.y - caveMap.getPosBotL(currTile).y) / caveMap.tileSize) * rayUnitStepSize.y;
         } else {
             step.y = 1;
-            rayLength1D.y = ((caveMap.getPos(currTile).y + caveMap.tileSize - start.y) / caveMap.tileSize) * rayUnitStepSize.y;
+            rayLength1D.y = ((caveMap.getPosBotL(currTile).y + caveMap.tileSize - start.y) / caveMap.tileSize) * rayUnitStepSize.y;
         }
 
         float distance = 0;
@@ -121,5 +121,13 @@ public class MapRenderer {
         }
 
         return new Vector2(dir.x * distance, dir.y * distance).add(start);
+    }
+
+    public void drawPolys() {
+        //testing polygons for walls
+        lineRenderer.setColor(Color.GREEN);
+        for(MapWallGenerator.Line line : caveMap.getWallLines()) {
+            lineRenderer.line(line.start, line.end);
+        }
     }
 }

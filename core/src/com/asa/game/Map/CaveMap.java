@@ -13,6 +13,7 @@ public class CaveMap {
 
     private boolean[][] walls; //true = wall
     private Random rand;
+    private List<MapWallGenerator.Line> wallLines;
 
     public CaveMap(int size, int tileSize) {
         this.size = size;
@@ -23,10 +24,8 @@ public class CaveMap {
 
         addRandomWalls(size/2, 1, size/2);
         clearCenter();
-    }
 
-    public boolean[][] getWalls() {
-        return walls;
+        wallLines = MapWallGenerator.getWallLines(this);
     }
 
     public Vector2 getCenter() {
@@ -60,10 +59,6 @@ public class CaveMap {
         return new GridPoint2((int) pos.x / tileSize, (int) pos.y / tileSize);
     }
 
-    public Vector2 getPos(GridPoint2 tile) {
-        return new Vector2(tile.x * tileSize, tile.y * tileSize);
-    }
-
     public boolean isInBounds(GridPoint2 tile) {
         return tile.x >= 0 && tile.y >= 0 && tile.x < size && tile.y < size;
     }
@@ -72,6 +67,7 @@ public class CaveMap {
         return x >= 0 && y >= 0 && x < size && y < size;
     }
 
+    // todo: Move this stuff to another class
     private void addRandomWalls(int numWalls, int minSize, int maxSize) {
         for(int i = 0; i < numWalls; i++) {
             GridPoint2 startTile = getRandomTile();
@@ -134,5 +130,33 @@ public class CaveMap {
         return true;
     }
 
+    public List<MapWallGenerator.Line> getWallLines() {
+        return wallLines;
+    }
 
+    public int getSize() {
+        return size;
+    }
+
+    public int getTileSize() {
+        return tileSize;
+    }
+
+    public Vector2 getPosBotL(GridPoint2 tile) {
+        return new Vector2(tile.x * tileSize, tile.y * tileSize);
+    }
+
+    public Vector2 getPosBotL(int x, int y) { return new Vector2(x * tileSize, y * tileSize); }
+
+    public Vector2 getPosTopL(GridPoint2 tile) { return new Vector2(tile.x * tileSize, (tile.y + 1) * tileSize); }
+
+    public Vector2 getPosTopL(int x, int y) { return new Vector2(x * tileSize, (y + 1) * tileSize); }
+
+    public Vector2 getPosBotR(GridPoint2 tile) { return new Vector2((tile.x + 1) * tileSize, tile.y * tileSize); }
+
+    public Vector2 getPosBotR(int x, int y) { return new Vector2((x + 1) * tileSize, y * tileSize); }
+
+    public Vector2 getPosTopR(GridPoint2 tile) { return new Vector2((tile.x + 1) * tileSize, (tile.y + 1) * tileSize); }
+
+    public Vector2 getPosTopR(int x, int y) { return new Vector2((x + 1) * tileSize, (y + 1) * tileSize); }
 }

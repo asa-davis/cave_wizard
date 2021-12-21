@@ -52,6 +52,7 @@ public class MainGame extends ApplicationAdapter {
 		lineRenderer.begin(ShapeRenderer.ShapeType.Line);
 		//mapRenderer.drawGrid();
 		mapRenderer.drawRays();
+		mapRenderer.drawPolys(); // for testing
 		lineRenderer.end();
 
 		//for later - use one big floor texture to draw only the visible polygon
