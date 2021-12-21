@@ -35,23 +35,24 @@ public class MapWallGenerator {
             edges = new Line[4];
         }
 
-        private int getIndexFromDir(char dir) {
-            if (dir == 'N') return 0;
-            if (dir == 'S') return 1;
-            if (dir == 'E') return 2;
-            if (dir == 'W') return 3;
+        //todo: change this to take dir enum
+        private int getIndexFromDir(Direction dir) {
+            if (dir == Direction.NORTH) return 0;
+            if (dir == Direction.SOUTH) return 1;
+            if (dir == Direction.EAST) return 2;
+            if (dir == Direction.WEST) return 3;
             return -1; // what's an exception??
         }
 
-        public void setHasNeighbor(char dir) {
+        public void setHasNeighbor(Direction dir) {
             hasNeighbor[getIndexFromDir(dir)] = true;
         }
 
-        public void setEdge(char dir, Line edge) {
+        public void setEdge(Direction dir, Line edge) {
             edges[getIndexFromDir(dir)] = edge;
         }
 
-        public Line getEdge(char dir) {
+        public Line getEdge(Direction dir) {
             return edges[getIndexFromDir(dir)];
         }
 
@@ -62,6 +63,61 @@ public class MapWallGenerator {
         public MapCell getWesternNeighbor() {
             return westernNeighbor;
         }
+    }
+
+    private enum Direction {
+        NORTH (0, 1) {
+            @Override
+            public Line getEdge(CaveMap map, int x, int y) {
+                return new Line(map.getPosTopL(x, y), map.getPosTopR(x, y));
+            }
+        },
+        SOUTH( 0, -1) {
+            @Override
+            public Line getEdge(CaveMap map, int x, int y) {
+                return new Line(map.getPosBotL(x, y), map.getPosBotR(x, y));
+            }
+        },
+        EAST(1, 0) {
+            @Override
+            public Direction getDirToExtend() {
+                return SOUTH;
+            }
+
+            @Override
+            public Line getEdge(CaveMap map, int x, int y) {
+                return new Line(map.getPosBotR(x, y), map.getPosTopR(x, y));
+            }
+        },
+        WEST(-1, 0){
+            @Override
+            public Direction getDirToExtend() {
+                return SOUTH;
+            }
+
+            @Override
+            public Line getEdge(CaveMap map, int x, int y) {
+                return new Line(map.getPosBotL(x, y), map.getPosTopL(x, y));
+            }
+        };
+
+        private int xMod;
+        private int yMod;
+
+        Direction(int xMod, int yMod ) {
+            this.xMod = xMod;
+            this.yMod = yMod;
+        }
+
+        public GridPoint2 getTilePos(int x, int y) {
+            return new GridPoint2(x + xMod, y + yMod);
+        }
+
+        public Direction getDirToExtend() {
+            return WEST;
+        }
+
+        public abstract Line getEdge(CaveMap map, int x, int y);
     }
 
     // algorithm based on this: https://www.youtube.com/watch?v=fc3nnG2CG8U
@@ -77,65 +133,24 @@ public class MapWallGenerator {
                     MapCell cell = new MapCell();
                     mapCells[y][x] = cell;
 
-                    // todo: fix repetitions
+                    //calculate edge for all directions
+                    for(Direction dir : Direction.values()) {
+                        // if northern tile is in bounds and not a wall we need a northern edge
+                        GridPoint2 dirPos = dir.getTilePos(x, y);
+                        GridPoint2 extendDirPos = dir.getDirToExtend().getTilePos(x, y);
+                        Line edge = dir.getEdge(map, x, y);
 
-                    // if northern tile is in bounds and not a wall we need a northern edge
-                    if(map.isInBounds(x, y + 1) && !map.isWall(x, y + 1)) {
-                        // extend northern edge of western neighbor if it exists
-                        if(map.isWall(x - 1, y) && mapCells[y][x - 1].getEdge('N') != null) {
-                            mapCells[y][x - 1].getEdge('N').end = map.getPosTopR(x, y);
-                            cell.setEdge('N', mapCells[y][x - 1].getEdge('N'));
-                        }
-                        // otherwise, create a new northern edge
-                        else {
-                            Line edge = new Line(map.getPosTopL(x, y), map.getPosTopR(x, y));
-                            lines.add(edge);
-                            cell.setEdge('N', edge);
-                        }
-                    }
-
-                    // if southern tile is in bounds and not a wall we need a southern edge
-                    if(map.isInBounds(x, y - 1) && !map.isWall(x, y - 1)) {
-                        // extend southern edge of western neighbor if it exists
-                        if(map.isWall(x - 1, y) && mapCells[y][x - 1].getEdge('S') != null) {
-                            mapCells[y][x - 1].getEdge('S').end = map.getPosBotR(x, y);
-                            cell.setEdge('S', mapCells[y][x - 1].getEdge('S'));
-                        }
-                        // otherwise, create a new southern edge
-                        else {
-                            Line edge = new Line(map.getPosBotL(x, y), map.getPosBotR(x, y));
-                            lines.add(edge);
-                            cell.setEdge('S', edge);
-                        }
-                    }
-
-                    // if eastern tile is in bounds and not a wall we need an eastern edge
-                    if(map.isInBounds(x + 1, y) && !map.isWall(x + 1, y)) {
-                        // extend eastern edge of southern neighbor if it exists
-                        if(map.isWall(x, y - 1) && mapCells[y - 1][x].getEdge('E') != null) {
-                            mapCells[y - 1][x].getEdge('E').end = map.getPosTopR(x, y);
-                            cell.setEdge('E', mapCells[y - 1][x].getEdge('E'));
-                        }
-                        // otherwise, create a new eastern edge
-                        else {
-                            Line edge = new Line(map.getPosBotR(x, y), map.getPosTopR(x, y));
-                            lines.add(edge);
-                            cell.setEdge('E', edge);
-                        }
-                    }
-
-                    // if western tile is in bounds and not a wall we need an western edge
-                    if(map.isInBounds(x - 1, y) && !map.isWall(x - 1, y)) {
-                        // extend western edge of southern neighbor if it exists
-                        if(map.isWall(x, y - 1) && mapCells[y - 1][x].getEdge('W') != null) {
-                            mapCells[y - 1][x].getEdge('W').end = map.getPosTopL(x, y);
-                            cell.setEdge('W', mapCells[y - 1][x].getEdge('W'));
-                        }
-                        // otherwise, create a new western edge
-                        else {
-                            Line edge = new Line(map.getPosBotL(x, y), map.getPosTopL(x, y));
-                            lines.add(edge);
-                            cell.setEdge('W', edge);
+                        if(map.isInBounds(dirPos) && !map.isWall(dirPos)) {
+                            // extend northern edge of western neighbor if it exists
+                            if(map.isWall(extendDirPos) && mapCells[extendDirPos.y][extendDirPos.x].getEdge(dir) != null) {
+                                mapCells[extendDirPos.y][extendDirPos.x].getEdge(dir).end = edge.end;
+                                cell.setEdge(dir, mapCells[extendDirPos.y][extendDirPos.x].getEdge(dir));
+                            }
+                            // otherwise, create a new northern edge
+                            else {
+                                lines.add(edge);
+                                cell.setEdge(dir, edge);
+                            }
                         }
                     }
                 }
@@ -175,8 +190,5 @@ public class MapWallGenerator {
     }
 
     public static void main(String[] args) {
-        MapCell[] cells = new MapCell[4];
-        cells[0] = new MapCell();
-        System.out.println(cells[0].getEdge('N'));
     }
 }
