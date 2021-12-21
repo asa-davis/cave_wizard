@@ -114,7 +114,8 @@ public class MapWallGenerator {
                     MapCell cell = new MapCell();
                     mapCells[y][x] = cell;
 
-                    //calculate edge for all directions
+                    // calculate edge for all directions
+                    // comments apply to northern edge example
                     for(Direction dir : Direction.values()) {
                         // if northern tile is in bounds and not a wall we need a northern edge
                         GridPoint2 dirPos = dir.getTilePos(x, y);
